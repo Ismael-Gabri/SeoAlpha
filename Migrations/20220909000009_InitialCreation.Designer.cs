@@ -12,7 +12,7 @@ using SeoAlpha.Data;
 namespace SeoAlpha.Migrations
 {
     [DbContext(typeof(SeoDataContext))]
-    [Migration("20220908183754_InitialCreation")]
+    [Migration("20220909000009_InitialCreation")]
     partial class InitialCreation
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
