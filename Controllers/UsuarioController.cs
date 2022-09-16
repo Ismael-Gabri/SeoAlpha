@@ -17,7 +17,7 @@ namespace SeoAlpha.Controllers
                 var usuarios = await context.Usuarios.ToListAsync();
 
                 if (usuarios.Count == 0)
-                    return Ok("Lista Vazia");
+                    return Ok("Lista Vazia []");
                 else
                     return Ok(new ResultViewModel<List<Usuario>>(usuarios));
             }
@@ -61,7 +61,8 @@ namespace SeoAlpha.Controllers
                     Email = model.Email,
                     Senha = model.Senha,
                     DataNascimento = DateTime.UtcNow,
-                    DataCriacao = DateTime.UtcNow
+                    DataCriacao = DateTime.UtcNow,
+                    CargoId = 3
                 };
 
                 await context.Usuarios.AddAsync(usuario);

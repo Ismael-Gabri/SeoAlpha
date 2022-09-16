@@ -12,5 +12,8 @@
         public string Senha { get; set; }
         public DateTime DataNascimento { get; set; }
         public DateTime DataCriacao { get; set; }
+        public int CargoId { get; set; }
+
+        public IList <Cargo> Cargos { get; set; }
     }
 }
