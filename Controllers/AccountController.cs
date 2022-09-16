@@ -1,6 +1,8 @@
 ﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using SecureIdentity.Password;
 using SeoAlpha.Data;
 using SeoAlpha.Models;
 using SeoAlpha.Services;
@@ -17,8 +19,8 @@ namespace SeoAlpha.Controllers
             _tokenService = tokenService;
         }
 
-        [HttpPost]
-        public async Task<IActionResult> RegistrarUsuario([FromBody] CriarUsuarioViewModel model, [FromServices] SeoDataContext context)
+        [HttpPost("v1/accounts/usuario")]
+        public async Task<IActionResult> RegistrarUsuarioAsync([FromBody] CriarUsuarioViewModel model, [FromServices] SeoDataContext context)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState.Values);
@@ -29,7 +31,7 @@ namespace SeoAlpha.Controllers
                 {
                     Nome = model.Nome,
                     Email = model.Email,
-                    Senha = model.Senha,
+                    Senha = PasswordHasher.Hash(model.Senha),
                     DataNascimento = DateTime.UtcNow,
                     DataCriacao = DateTime.UtcNow,
                     CargoId = 3
@@ -50,6 +52,37 @@ namespace SeoAlpha.Controllers
             }
         }
 
+        [HttpPost("v1/accounts/login")]
+        public async Task<IActionResult> LoginAsync([FromBody] LoginViewModel model, [FromServices] TokenService tokenService,[FromServices] SeoDataContext context)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState.Values);
+
+            var usuario = await context.Usuarios.FirstOrDefaultAsync(x => x.Email == model.Email);
+
+            if (usuario == null)
+                return NotFound(new ResultViewModel<Usuario>("Usuario Nao encontrado :("));
+
+            if (!PasswordHasher.Verify(usuario.Senha, model.Senha))
+                return StatusCode(401, new ResultViewModel<string>("Usuario ou senha invalidos"));
+
+            try
+            {
+                var token = tokenService.GerarToken(usuario);
+                return Ok(new ResultViewModel<string>(token, null));
+            }
+            catch (Exception)
+            {
+                return StatusCode(500);
+                throw;
+            }
+        }
+
+
+
+
+
+        //Testes
         [AllowAnonymous]
         [HttpPost("v1/login")]
         public IActionResult Login()
